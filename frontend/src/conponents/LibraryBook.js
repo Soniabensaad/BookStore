@@ -1,9 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { VStack, Button, Image, Text, Center, Heading, useToast } from "@chakra-ui/react";
 import ReactStars from "react-rating-stars-component";
 
 export default function LibraryBook({ book, fetchData }) {
+  const [rating, setRating] = useState(() => {
+    const savedRating = localStorage.getItem(`book-rating-${book.id}`);
+    return savedRating ? parseInt(savedRating, 10) : book.rating || 0;
+  });
   const bookMoveToast = useToast();
+
+  useEffect(() => {
+    localStorage.setItem(`book-rating-${book.id}`, rating);
+  }, [rating, book.id]);
+
+  const handleRatingChange = (newRating) => {
+    setRating(newRating);
+  };
 
   const moveBook = (book, newSection) => {
     const body = JSON.stringify({
@@ -48,16 +60,16 @@ export default function LibraryBook({ book, fetchData }) {
       <Center>
         <Heading size="sm">{book.title}</Heading>
       </Center>
-      {book.state === 0 && !book.rating && (
+      {book.state === 0 && !rating && (
         <Text fontSize="sm">Rate Book ?</Text>
       )}
       {book.state === 0 && (
         <ReactStars
           count={5}
-          onChange={(new_rating) => null}
+          onChange={handleRatingChange}
           size={24}
           activeColor="#ffd700"
-          value={book.rating}
+          value={rating}
         />
       )}
       {book.state === 1 && (
@@ -70,7 +82,6 @@ export default function LibraryBook({ book, fetchData }) {
           Completed Book ?
         </Button>
       )}
-
       {book.state === 2 && (
         <Button
           variant="outline"

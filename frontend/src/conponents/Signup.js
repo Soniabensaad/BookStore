@@ -1,34 +1,32 @@
 import React, { useState } from 'react';
 import { VStack, FormControl, FormLabel, Input, Button, Heading, Alert, AlertIcon } from "@chakra-ui/react";
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const Login = ({ handleLogin }) => {
+const SignUp = () => {
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
-  const handleLoginClick = async () => {
+  const handleSignUp = async () => {
     try {
-      const response = await axios.post('http://localhost:8000/login', {
+      const response = await axios.post('http://localhost:8000/signup', {
         username,
+        email,
         password
       });
-      setSuccess('Logged in successfully');
+      setSuccess('Account created successfully');
       setError('');
-      handleLogin(); // Call parent login handler
-      navigate('/'); // Redirect to Discover page
     } catch (err) {
-      setError('Invalid username or password');
+      setError('Failed to create account');
       setSuccess('');
     }
   };
 
   return (
     <VStack spacing={4}>
-      <Heading size="lg">Login</Heading>
+      <Heading size="lg">Sign Up</Heading>
       {success && (
         <Alert status="success">
           <AlertIcon />
@@ -46,12 +44,16 @@ const Login = ({ handleLogin }) => {
         <Input value={username} onChange={(e) => setUsername(e.target.value)} />
       </FormControl>
       <FormControl>
+        <FormLabel>Email</FormLabel>
+        <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+      </FormControl>
+      <FormControl>
         <FormLabel>Password</FormLabel>
         <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
       </FormControl>
-      <Button colorScheme="blue" onClick={handleLoginClick}>Login</Button>
+      <Button colorScheme="blue" onClick={handleSignUp}>Sign Up</Button>
     </VStack>
   );
 };
 
-export default Login;
+export default SignUp;

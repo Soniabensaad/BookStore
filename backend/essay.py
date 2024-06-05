@@ -35,6 +35,11 @@ class UpdateState(BaseModel):
     volume_id: str
     new_state: int
 
+class UserSignup(BaseModel):
+    username: str
+    email: str
+    password: str
+
 # FastAPI instance
 app = FastAPI()
 
@@ -63,7 +68,6 @@ db = {
     }
 }
 
-
 # Models for authentication
 class Token(BaseModel):
     access_token: str
@@ -87,6 +91,20 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # OAuth2 scheme for token handling
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+@app.post("/users/", response_model=User)
+async def create_user(user: UserSignup):
+    if user.username in db:
+        raise HTTPException(status_code=400, detail="User already exists")
+    hashed_password = pwd_context.hash(user.password)
+    user_data = {
+        "username": user.username,
+        "email": user.email,
+        "hashed_password": hashed_password,
+        "disabled": False
+    }
+    db[user.username] = user_data
+    return user
+
 # Function to verify password
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -104,7 +122,6 @@ def authenticate_user(db, username: str, password: str):
         return False
     if not verify_password(password, user.hashed_password):
         return False
-
     return user
 
 # Function to create access token
@@ -114,7 +131,6 @@ def create_access_token(data: dict, expires_delta: timedelta or None = None):
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
-
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -131,22 +147,18 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         username: str = payload.get("sub")
         if username is None:
             raise credential_exception
-
         token_data = TokenData(username=username)
     except JWTError:
         raise credential_exception
-
     user = get_user(db, username=token_data.username)
     if user is None:
         raise credential_exception
-
     return user
 
 # Dependency to get current active user
 async def get_current_active_user(current_user: UserInDB = Depends(get_current_user)):
     if current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
-
     return current_user
 
 # Login endpoint to issue access tokens
@@ -171,7 +183,10 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
     return current_user
 
-
+# Get all users endpoint
+@app.get("/users/", response_model=List[User])
+async def read_users():
+    return [User(**user_data) for user_data in db.values()]
 
 # Database connection configuration
 def get_connection():
@@ -207,12 +222,10 @@ async def get_books():
 async def new_book(book: Book):
     conn = get_connection()
     cur = conn.cursor()
-
     # Check if the record with the same volume_id already exists
     cur.execute("SELECT volume_id FROM books WHERE volume_id = %s", (book.volume_id,))
     existing_record = cur.fetchone()
     if existing_record:
-        
         pass
     else:
         # Insert the new record
@@ -221,7 +234,6 @@ async def new_book(book: Book):
             (book.volume_id, book.title, book.authors, book.thumbnail, book.state),
         )
         conn.commit()
-
     cur.close()
     conn.close()
     return

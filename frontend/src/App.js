@@ -6,6 +6,7 @@ import SignUp from './conponents/Signup'
 import Login from './conponents/Login';
 
 
+
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [books, setBooks] = useState([]);
@@ -101,7 +102,7 @@ function App() {
             <>
               {activeTab === 'SignUp' ? <SignUp /> : <Login handleLogin={handleLogin} />}
               <Button mt={4} onClick={() => setActiveTab(activeTab === 'SignUp' ? 'Login' : 'SignUp')}>
-                {activeTab === 'SignUp' ? 'Switch to Login' : 'Switch to Sign Up'}
+                {activeTab === 'SignUp' ? 'Switch to Login' : 'Switch to SignUp'}
               </Button>
             </>
           )}

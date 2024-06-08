@@ -29,6 +29,7 @@ class User(BaseModel):
     email: str
     password: str
 
+
     class Config:
         schema_extra = {
             "example": {
@@ -88,6 +89,7 @@ class Book(BaseModel):
     thumbnail: Optional[str] = None
     state: int
     rating: Optional[int] = None
+   
 
 
 class Book_id(BaseModel):
@@ -163,6 +165,7 @@ async def get_books():
     cur.close()
     conn.close()
     return formatted_books
+
 
 
 @app.post("/books", status_code=status.HTTP_201_CREATED)

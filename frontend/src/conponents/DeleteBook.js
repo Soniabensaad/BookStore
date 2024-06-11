@@ -22,7 +22,7 @@ export default function DeleteBook({ book, refreshData }) {
       refreshData();
       toast({
         title: "Deleted",
-        description: "Book removed from wishlist",
+        description: "Book removed ",
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -31,7 +31,7 @@ export default function DeleteBook({ book, refreshData }) {
       console.error("Error deleting book:", error);
       toast({
         title: "Error",
-        description: "Failed to delete book from wishlist",
+        description: "Failed to delete book",
         status: "error",
         duration: 3000,
         isClosable: true,

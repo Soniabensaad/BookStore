@@ -83,6 +83,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # Books models
 class Book(BaseModel):
     id: int = None
+    user_id: int
     volume_id: str
     title: str
     authors: Optional[str] = None
